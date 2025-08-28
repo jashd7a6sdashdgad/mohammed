@@ -908,14 +908,24 @@ export default function SchoolChatApp() {
       };
       
       // Create URL with query parameters for GET request
-      const url = new URL('https://n8n.1000273.xyz/webhook/50e8cd95-3ef5-4345-837a-55ce3823a14c');
+      // Use attachment-specific webhook if files are uploaded, otherwise use regular webhook
+      const baseWebhookUrl = attachments.length > 0 
+        ? 'https://n8n.1000273.xyz/webhook/atackment'
+        : 'https://n8n.1000273.xyz/webhook/50e8cd95-3ef5-4345-837a-55ce3823a14c';
+      
+      const url = new URL(baseWebhookUrl);
       url.searchParams.append('chatInput', inputMessage);
       url.searchParams.append('sessionId', currentSessionId);
       if (detectedSubject?.name) {
         url.searchParams.append('subject', detectedSubject.name);
       }
       if (attachments.length > 0) {
-        url.searchParams.append('attachments', JSON.stringify(attachments));
+        // Send attachment fields as separate query parameters
+        const attachment = attachments[0]; // Take the first attachment
+        url.searchParams.append('file_id', attachment.id);
+        url.searchParams.append('file_type', attachment.type);
+        url.searchParams.append('file_title', attachment.name);
+        url.searchParams.append('base64', attachment.base64 || '');
       }
       
       console.log('Sending to n8n webhook:', payload);
@@ -1666,6 +1676,18 @@ export default function SchoolChatApp() {
                 title="View History"
               >
                 <History className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => window.open('https://wordleunlimited.org/', '_blank')}
+                className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                  isDarkMode 
+                    ? 'bg-white/10 hover:bg-white/20 text-green-400' 
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                }`}
+                title="Play Wordle Unlimited"
+              >
+                <Brain className="w-4 h-4" />
               </button>
               
               <button
